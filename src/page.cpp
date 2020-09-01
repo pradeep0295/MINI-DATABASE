@@ -36,16 +36,30 @@ Page::Page(string tableName, int pageIndex)
     uint maxRowCount = table.maxRowsPerBlock;
     vector<int> row(columnCount, 0);
     this->rows.assign(maxRowCount, row);
-
-    ifstream fin(pageName, ios::in);
     this->rowCount = table.rowsPerBlockCount[pageIndex];
-    int number;
+
+    // ifstream fin(pageName, ios::in);
+    // int number;
+    // for (uint rowCounter = 0; rowCounter < this->rowCount; rowCounter++)
+    // {
+    //     for (int columnCounter = 0; columnCounter < columnCount; columnCounter++)
+    //     {
+    //         fin >> number;
+    //         this->rows[rowCounter][columnCounter] = number;
+    //     }
+    // }
+    // fin.close();
+
+    ifstream fin(pageName, ios::binary);
+
+    this->rowCount = table.rowsPerBlockCount[pageIndex];
+    int32_t number;
     for (uint rowCounter = 0; rowCounter < this->rowCount; rowCounter++)
-    {
+    {   
         for (int columnCounter = 0; columnCounter < columnCount; columnCounter++)
         {
-            fin >> number;
-            this->rows[rowCounter][columnCounter] = number;
+            fin.read((char*) & number, sizeof(number));
+            this->rows[rowCounter][columnCounter] = (int)number;
         }
     }
     fin.close();
@@ -82,19 +96,40 @@ Page::Page(string tableName, int pageIndex, vector<vector<int>> rows, int rowCou
  * @brief writes current page contents to file.
  * 
  */
+// void Page::writePage()
+// {
+//     logger.log("Page::writePage");
+//     ofstream fout(this->pageName, ios::trunc);
+//     for (int rowCounter = 0; rowCounter < this->rowCount; rowCounter++)
+//     {
+//         for (int columnCounter = 0; columnCounter < this->columnCount; columnCounter++)
+//         {
+//             if (columnCounter != 0)
+//                 fout << " ";
+//             fout << this->rows[rowCounter][columnCounter];
+//         }
+//         fout << endl;
+//     }
+//     fout.close();
+// }
+
 void Page::writePage()
 {
     logger.log("Page::writePage");
-    ofstream fout(this->pageName, ios::trunc);
+
+    ofstream fout(this->pageName, ios::trunc| ios::binary);
+
+    int32_t num;
+
     for (int rowCounter = 0; rowCounter < this->rowCount; rowCounter++)
     {
         for (int columnCounter = 0; columnCounter < this->columnCount; columnCounter++)
         {
-            if (columnCounter != 0)
-                fout << " ";
-            fout << this->rows[rowCounter][columnCounter];
+
+            num = this->rows[rowCounter][columnCounter];
+
+            fout.write((char*) &num, sizeof(num));
         }
-        fout << endl;
     }
     fout.close();
 }
