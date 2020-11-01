@@ -157,8 +157,8 @@ void Matrix::transpose(){
     this->is_transposed = !this->is_transposed;
 }
 
-int main(){
-    Matrix A("z");
-    A.load();
-    A.transpose();
-}
+// int main(){
+//     Matrix A("z");
+//     A.load();
+//     A.transpose();
+// }
