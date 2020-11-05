@@ -63,6 +63,7 @@ void executePROJECTION()
 
     while (!row.empty())
     {
+        // cout<<row.size()<<endl;
 
         for (int columnCounter = 0; columnCounter < columnIndices.size(); columnCounter++)
         {

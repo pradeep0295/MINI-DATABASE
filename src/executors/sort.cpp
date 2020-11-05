@@ -1,4 +1,5 @@
 #include"global.h"
+#include"sort.h"
 /**
  * @brief File contains method to process SORT commands.
  * 
@@ -15,8 +16,8 @@ bool syntacticParseSORT(){
     }
     parsedQuery.queryType = SORT;
     parsedQuery.sortResultRelationName = tokenizedQuery[0];
-    parsedQuery.sortColumnName = tokenizedQuery[3];
-    parsedQuery.sortRelationName = tokenizedQuery[5];
+    parsedQuery.sortColumnName = tokenizedQuery[5];
+    parsedQuery.sortRelationName = tokenizedQuery[3];
     string sortingStrateg = tokenizedQuery[7];
     if(sortingStrateg == "ASC")
         parsedQuery.sortingStrategy = ASC;
@@ -38,7 +39,7 @@ bool semanticParseSORT(){
     }
 
     if(!tableCatalogue.isTable(parsedQuery.sortRelationName)){
-        cout<<"SEMANTIC ERROR: Relation doesn't exist"<<endl;
+        cout<<"sort::SEMANTIC ERROR: Relation doesn't exist "<<endl;
         return false;
     }
 
@@ -49,8 +50,153 @@ bool semanticParseSORT(){
 
     return true;
 }
+int globaColIndex=0;
 
+bool cmp(std::vector<int> &v1, std::vector<int> &v2){
+    if(parsedQuery.sortingStrategy==DESC)
+        return v1[globaColIndex]>v2[globaColIndex];
+    return v1[globaColIndex]<v2[globaColIndex];
+}
 void executeSORT(){
     logger.log("executeSORT");
-    return;
+
+    int buffer=8;
+
+    Table table = *tableCatalogue.getTable(parsedQuery.sortRelationName);
+    Table* resultantTable = new Table(parsedQuery.sortResultRelationName, table.columns);
+    Cursor cursor = table.getCursor();
+    // vector<int> columnIndices;
+
+    int colIndex= table.getColumnIndex(parsedQuery.sortColumnName);
+    globaColIndex=colIndex;
+
+    // when i fully understand buffer i wll add
+    // max rows per block * buffer maybe??
+
+    vector<int> row = cursor.getNext();
+    int maxInMemoryRows=table.maxRowsPerBlock * buffer;
+    int fileCounter=0;
+    for (;!row.empty();fileCounter++){
+        int tempBuf=maxInMemoryRows;
+        vector<std::vector<int>> tempVector;
+        while(!row.empty() and tempBuf--){
+            tempVector.push_back(row);
+            row = cursor.getNext();
+        }
+        sort(tempVector.begin(),tempVector.end(),cmp);
+        // write vector to .temp
+        string sourceFileName = "../data/temp/" + parsedQuery.sortResultRelationName + std::to_string(fileCounter) + ".temp";
+        std::fstream fs;
+        fs.open (sourceFileName, std::fstream::out | std::fstream::app);
+        writeFile(tempVector,fs);
+        fs.close();
+    }
+
+    ifstream srcchunks[fileCounter];
+    ////////////
+    if(parsedQuery.sortingStrategy==DESC){
+        priority_queue<pair<int,int>> pq;
+        map<int,vector<int>> mp;
+
+        for(int i=0;i<fileCounter;i++){
+            string sourceFileName = "../data/temp/" + parsedQuery.sortResultRelationName + std::to_string(i) + ".temp";
+            srcchunks[i].open(sourceFileName);
+            string line;
+            srcchunks[i]>>line;
+            vector<int> row=deflate(line);
+            // for(int x:row) cout<<x<<" ";
+            //     cout<<endl;
+            pq.push({row[colIndex],i});
+            // cout<<"Ccolindex:: "<<row[colIndex]<<endl;
+            mp[i]=row;
+        }
+
+        while(!pq.empty()){
+            pair<int,int> p=pq.top();
+            int y=p.second;
+            pq.pop();
+            resultantTable->writeRow<int>(mp[y]);
+            // for(int x:mp[y]) cout<<x<<" ";
+            //     cout<<endl;
+            string line;
+            if(srcchunks[y]>>line){
+                vector<int> row=deflate(line);
+                pq.push({row[colIndex],y});
+                // cout<<"index:: "<<row[colIndex]<<endl;
+                mp[y]=row;
+                // test
+            }
+        }
+
+        resultantTable->blockify();
+        tableCatalogue.insertTable(resultantTable);
+    }
+    else{
+        priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+        map<int,vector<int>> mp;
+
+        for(int i=0;i<fileCounter;i++){
+            string sourceFileName = "../data/temp/" + parsedQuery.sortResultRelationName + std::to_string(i) + ".temp";
+            srcchunks[i].open(sourceFileName);
+            string line;
+            srcchunks[i]>>line;
+            vector<int> row=deflate(line);
+            // for(int x:row) cout<<x<<" ";
+            //     cout<<endl;
+            pq.push({row[colIndex],i});
+            // cout<<"Ccolindex:: "<<row[colIndex]<<endl;
+            mp[i]=row;
+        }
+
+        while(!pq.empty()){
+            pair<int,int> p=pq.top();
+            int y=p.second;
+            pq.pop();
+            resultantTable->writeRow<int>(mp[y]);
+            // for(int x:mp[y]) cout<<x<<" ";
+            //     cout<<endl;
+            string line;
+            if(srcchunks[y]>>line){
+                vector<int> row=deflate(line);
+                pq.push({row[colIndex],y});
+                // cout<<"index:: "<<row[colIndex]<<endl;
+                mp[y]=row;
+                // test
+            }
+        }
+
+        resultantTable->blockify();
+        tableCatalogue.insertTable(resultantTable);
+    }
+
+    
+    ///////////
+    return ;
 }
+
+void writeFile(vector<std::vector<int>> file, fstream &fout)
+{
+    logger.log("Sort::writeFile");
+    
+    for(auto row:file){
+        for (int columnCounter = 0; columnCounter < row.size(); columnCounter++){
+            if (columnCounter != 0)
+                fout << ",";
+            fout << row[columnCounter];
+        }
+        fout << endl;
+    }
+}
+
+vector<int> deflate(string line){
+        // cout<<"line "<<line<<endl;
+        vector<int> row;
+        stringstream s(line);
+        string b;
+        while(getline(s,b,',')){
+            int x=stoi(b);
+            row.push_back(x);
+        }
+        return row;
+}
+
