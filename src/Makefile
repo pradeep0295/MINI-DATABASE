@@ -1,6 +1,9 @@
 # *****************************************************
 # Variables to control Makefile operation
 
+# in 86b20a2..e95f32d  master -> master
+# targeted it compatible to c++17
+
 CXX = g++
 CXXFLAGS = -std=c++17 -g -I .
 
