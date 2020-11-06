@@ -1,13 +1,18 @@
 #include "global.h"
 /**
  * @brief 
- * SYNTAX: INDEX ON column_name FROM relation_name USING indexing_strategy
+ * SYNTAX: INDEX ON column_name FROM relation_name USING indexing_strategy 
+ *         [FANOUT <number_of_children_pointers>|BUCKETS <bucket_count>]
  * indexing_strategy: ASC | DESC | NOTHING
+ * FANOUT: integer
+ * BUCKETS: initial bucket count to start linear hash.
  */
 bool syntacticParseINDEX()
 {
     logger.log("syntacticParseINDEX");
-    if (tokenizedQuery.size() != 7 || tokenizedQuery[1] != "ON" || tokenizedQuery[3] != "FROM" || tokenizedQuery[5] != "USING")
+    if (tokenizedQuery.size() != 9 || tokenizedQuery[1] != "ON" 
+        || tokenizedQuery[3] != "FROM" || tokenizedQuery[5] != "USING"
+        || (tokenizedQuery[7] != "FANOUT" && tokenizedQuery[7] != "BUCKETS"))
     {
         cout << "SYNTAX ERROR" << endl;
         return false;
@@ -16,6 +21,7 @@ bool syntacticParseINDEX()
     parsedQuery.indexColumnName = tokenizedQuery[2];
     parsedQuery.indexRelationName = tokenizedQuery[4];
     string indexingStrategy = tokenizedQuery[6];
+    parsedQuery.indexInitialise = stoi(tokenizedQuery[8]);
     if (indexingStrategy == "BTREE")
         parsedQuery.indexingStrategy = BTREE;
     else if (indexingStrategy == "HASH")
@@ -54,5 +60,12 @@ bool semanticParseINDEX()
 void executeINDEX()
 {
     logger.log("executeINDEX");
+    Table* table = tableCatalogue.getTable(parsedQuery.indexRelationName);
+    table->indexingStrategy = parsedQuery.indexingStrategy;
+    table->indexedColumn = parsedQuery.indexColumnName;
+    /* Create an instance of linear hash for this table 
+    and initialize with given no. of buckets */
+    table->index = static_cast<void *>(new Linearhash(2,parsedQuery.indexInitialise));
+    table->buildIndex();
     return;
 }

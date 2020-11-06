@@ -1,9 +1,4 @@
-#include<iostream>
-#include<unordered_set>
-#include<vector>
 #include<math.h>
-using namespace std;
-
 /**
  * @brief 
  * 2.0. Linear hashing with bucket(vector) containing KeyValue pairs.
@@ -31,6 +26,7 @@ class Linearhash{
     int r=0;
     float threshold = 0.75;
     float min_th    = 0.25;
+    int initial_buckets = 2;
 
     vector<Bucket*> bucket;  
 

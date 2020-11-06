@@ -1,10 +1,9 @@
-#include "linearhash.h"
-
+#include"global.h"
 
 Bucket::Bucket(int size){
-        this->avail.assign(size, true);
-        this->KeyValue.assign(size,{0,0});
-    }
+    this->avail.assign(size, true);
+    this->KeyValue.assign(size,{0,0});
+}
     
 bool Bucket::is_empty(){
     if(this->size >0) return false;
@@ -72,6 +71,7 @@ void Bucket::print(){
 
 Linearhash::Linearhash(int bucket_size, int initial_buckets){ // min one initial bucket
     Bucket_size = bucket_size;
+    this->initial_buckets = initial_buckets;
     for(int i=0;i<initial_buckets;i++)
         bucket.push_back(new Bucket(Bucket_size));
 }
@@ -135,7 +135,7 @@ void Linearhash::remove(int key, int value){
     r-=d;
 
     /* check occupancy and increase buckets */
-    while(bucket.size()>2 && (float)r/(bucket.size()*Bucket_size) < min_th){
+    while(bucket.size()>this->initial_buckets && (float)r/(bucket.size()*Bucket_size) < min_th){
         /* Allocate new bucket */
         int n_ = bucket.size()-1;
 
@@ -172,25 +172,26 @@ void Linearhash::print(){
     cout<<"total buckets:"<<this->bucket.size()<<" free:"<<free<<endl;
 }
 
-int main(){
-    int key,value,x;
-    Linearhash h = Linearhash(2,2);
-
-    for(int i=0;i<10;i++){
-        for(int j=0;j<100;j++){
-            h.insert(j,i+j);
-        }
-    }
-    h.print();
-    cout<<"............."<<endl;
-
-    for(int i=0;i<10;i++){
-        for(int j=0;j<100;j++){
-            h.remove(j,i+j);
-        }
-        h.print();
-        cout<<"......."<<endl;
-    }
+// int main(){
+//     int key,value,x;
+//     void *h = NULL;
+//     h = static_cast<void*>(new Linearhash(2,2));
     
-    return 0;
-}
+//     for(int i=0;i<10;i++){
+//         for(int j=0;j<100;j++){
+//             static_cast<Linearhash*>(h)->insert(j,i+j);
+//         }
+//     }
+//     static_cast<Linearhash*>(h)->print();
+//     cout<<"............."<<endl;
+
+//     for(int i=0;i<10;i++){
+//         for(int j=0;j<100;j++){
+//             static_cast<Linearhash*>(h)->remove(j,i+j);
+//         }
+//         static_cast<Linearhash*>(h)->print();
+//         cout<<"......."<<endl;
+//     }
+    
+//     return 0;
+// }

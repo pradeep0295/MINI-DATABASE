@@ -335,3 +335,32 @@ int Table::getColumnIndex(string columnName)
             return columnCounter;
     }
 }
+
+/**
+ * @brief Function that converts rec ptr back to record position.
+ */
+pair<int,int> Table::rec(int recptr){
+    return {recptr/this->maxRowsPerBlock , recptr%this->maxRowsPerBlock};
+} 
+void Table::buildLinearHash(){
+    Linearhash *hash = static_cast<Linearhash*>(this->index);
+
+    int column = getColumnIndex(this->indexedColumn);
+    Cursor cursor(this->tableName, 0);
+    vector<int> row;
+    for(int i=0;i<this->rowCount;i++){
+        row = cursor.getNext();
+        hash->insert(row[column],i);
+    }
+    hash->print();
+}
+/**
+ * @brief Function to create an index on specified column.
+ */
+void Table::buildIndex(){
+    if(this->indexingStrategy == HASH)
+        buildLinearHash();
+    // else if(this->indexingStrategy == BTREE)
+    //     buildBplustree();
+    this->indexed = true;
+}

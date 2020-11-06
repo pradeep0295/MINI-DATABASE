@@ -1,5 +1,5 @@
 #include "cursor.h"
-
+#include "linearhash.h"
 enum IndexingStrategy
 {
     BTREE,
@@ -33,7 +33,8 @@ public:
     bool indexed = false;
     string indexedColumn = "";
     IndexingStrategy indexingStrategy = NOTHING;
-    
+    void *index = NULL;
+
     bool extractColumnNames(string firstLine);
     bool blockify();
     void updateStatistics(vector<int> row);
@@ -50,6 +51,9 @@ public:
     Cursor getCursor();
     int getColumnIndex(string columnName);
     void unload();
+    pair<int,int> rec(int recptr);
+    void buildLinearHash();
+    void buildIndex();
 
     /**
  * @brief Static function that takes a vector of valued and prints them out in a
