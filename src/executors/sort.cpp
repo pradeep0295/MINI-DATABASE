@@ -59,11 +59,42 @@ bool cmp(std::vector<int> &v1, std::vector<int> &v2){
 }
 void executeSORT(){
     logger.log("executeSORT");
-
-    int buffer=8;
-
     Table table = *tableCatalogue.getTable(parsedQuery.sortRelationName);
-    Table* resultantTable = new Table(parsedQuery.sortResultRelationName, table.columns);
+    Table *resultantTable = new Table(parsedQuery.sortResultRelationName, table.columns);
+    if(table.indexed && parsedQuery.sortColumnName==table.indexedColumn){
+        if(table.indexingStrategy == HASH){
+            Linearhash* hash = static_cast<Linearhash*>(table.index);
+            vector<int>distinct;
+            if(parsedQuery.sortingStrategy == DESC)
+                distinct = hash->retrieveKeys("DESC");
+            else 
+                distinct = hash->retrieveKeys("ASC");
+            vector<vector<int>> rows;
+            int j=0;
+            for(int i=0;i<distinct.size();i++){
+                auto records = hash->get(distinct[i]);
+                for(auto record:records){
+                    if(j==table.maxRowsPerBlock){
+                        resultantTable->insertRecords(rows);
+                        j=0;
+                        rows.clear();
+                    }
+                    pair<int,int>page_rec = table.rec(record);
+                    Cursor cursor(table.tableName, page_rec.first);
+                    rows.push_back(cursor.page.getRow(page_rec.second));
+                    j++;
+                }
+            }
+            if(j){
+                resultantTable->insertRecords(rows);
+                j=0;
+                rows.clear();
+            }
+        }
+        tableCatalogue.insertTable(resultantTable);
+        return;
+    }
+    int buffer=8;
     Cursor cursor = table.getCursor();
     // vector<int> columnIndices;
 

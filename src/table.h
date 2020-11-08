@@ -52,8 +52,8 @@ public:
     int getColumnIndex(string columnName);
     void unload();
     pair<int,int> rec(int recptr);
-    void buildLinearHash();
     void buildIndex();
+    bool insertRecords(vector<vector<int>>rows);
 
     /**
  * @brief Static function that takes a vector of valued and prints them out in a

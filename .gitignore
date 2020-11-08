@@ -2,3 +2,4 @@
 *.out
 **/data/temp/
 **/src/log
+/src/server

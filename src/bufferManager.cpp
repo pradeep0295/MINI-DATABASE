@@ -93,6 +93,22 @@ void BufferManager::writePage(string tableName, int pageIndex, vector<vector<int
 }
 
 /**
+ * @brief The buffer manager is also responsible for updating pages. This is
+ *        called when new records are inserted into tables.
+ *
+ * @param tableName 
+ * @param pageIndex 
+ * @param rows 
+ * @param startrow
+ */
+void BufferManager::updatePage(string tableName, int pageIndex, vector<vector<int>> rows)
+{
+    logger.log("BufferManager::updatePage");
+    Page page = this->getPage(tableName,pageIndex);
+    page.updatePage(rows);
+}
+
+/**
  * @brief Deletes file names fileName
  *
  * @param fileName 

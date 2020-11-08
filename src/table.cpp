@@ -90,7 +90,7 @@ bool Table::extractColumnNames(string firstLine)
         this->columns.emplace_back(word);
     }
     this->columnCount = this->columns.size();
-    this->maxRowsPerBlock = (uint)((BLOCK_SIZE * 1000) / (32 * this->columnCount));
+    this->maxRowsPerBlock = (uint)((BLOCK_SIZE * 1000) / (4 * this->columnCount));
     return true;
 }
 
@@ -338,29 +338,72 @@ int Table::getColumnIndex(string columnName)
 
 /**
  * @brief Function that converts rec ptr back to record position.
+ * 
+ * @param recptr - record position in table.
  */
 pair<int,int> Table::rec(int recptr){
     return {recptr/this->maxRowsPerBlock , recptr%this->maxRowsPerBlock};
-} 
-void Table::buildLinearHash(){
-    Linearhash *hash = static_cast<Linearhash*>(this->index);
-
-    int column = getColumnIndex(this->indexedColumn);
-    Cursor cursor(this->tableName, 0);
-    vector<int> row;
-    for(int i=0;i<this->rowCount;i++){
-        row = cursor.getNext();
-        hash->insert(row[column],i);
-    }
-    hash->print();
 }
+
 /**
  * @brief Function to create an index on specified column.
+ * 
+ * @param None
  */
 void Table::buildIndex(){
-    if(this->indexingStrategy == HASH)
-        buildLinearHash();
-    // else if(this->indexingStrategy == BTREE)
-    //     buildBplustree();
+    int column = getColumnIndex(this->indexedColumn);
+    
+    Cursor cursor(this->tableName, 0);
+    vector<int> row;
+
+    for(int i=0;i<this->rowCount;i++){
+        row = cursor.getNext();
+        /* static cast void* to hash or b+tree object according to index type */
+        if(this->indexingStrategy == HASH){
+            Linearhash *Index = static_cast<Linearhash*>(this->index);
+            Index->insert(row[column],i);
+        }
+        // else if(this->indexingStrategy == BTREE)
+        //     buildBplustree();
+    }
+    // hash->print();
     this->indexed = true;
+}
+
+/**
+ * @brief Function that inserts a row into the table relation.
+ * 
+ * @param row containing the elements.
+ * @return yes if inserted else no.
+ */
+bool Table::insertRecords(vector<vector<int>> rows){
+    if(rows[0].size() != this->columnCount)
+        return false;
+    /* insert into already free last block of table.*/
+    int free = this->maxRowsPerBlock-(this->rowCount%this->maxRowsPerBlock);
+    int lastPage = this->blockCount-1;
+    int start=0;
+    vector<vector<int>> r;
+    /* do check for Lastpage existence */
+    if( free != 0 && free !=this->maxRowsPerBlock && lastPage>-1){
+        for(int j=0;j<free&&j<rows.size();j++) r.push_back(rows[j]);
+        bufferManager.updatePage(this->tableName,lastPage,r);
+        this->rowCount+=r.size();
+        this->rowsPerBlockCount[lastPage]+=r.size();
+        start+=free;
+    }
+    /* if there is no space left or more rows to insert take fresh Page. */
+    while(start<rows.size()){
+        r.clear();
+        for(int i=start;i<start+this->maxRowsPerBlock;i++){
+            if(i==rows.size())break;
+            r.push_back(rows[i]);
+        }
+        bufferManager.writePage(this->tableName, this->blockCount, r, r.size());
+        this->blockCount++;
+        this->rowsPerBlockCount.emplace_back(r.size());
+        this->rowCount+=r.size();
+        start+=r.size();
+    }
+    return true;
 }

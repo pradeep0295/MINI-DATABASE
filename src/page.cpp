@@ -113,6 +113,18 @@ void Page::writePage()
     fout.close();
 }
 
+/**
+ * @brief Adds/updates particular row in the Page.
+ * 
+ * @param row
+ * @param rownum
+ */
+void Page::updatePage(vector<vector<int>> rows){
+    for(int i=0;i<rows.size();i++){
+        this->rows.push_back(rows[i]);
+        this->rowCount++;
+    }
+}
 // void Page::writePage()
 // {
 //     logger.log("Page::writePage");

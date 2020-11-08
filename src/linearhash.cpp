@@ -1,79 +1,44 @@
 #include"global.h"
 
-Bucket::Bucket(int size){
-    this->avail.assign(size, true);
-    this->KeyValue.assign(size,{0,0});
+Bucket::Bucket(){
 }
-    
-bool Bucket::is_empty(){
-    if(this->size >0) return false;
-    if(!this->overflow) return true;
-    return this->overflow->is_empty();
-}
+
 void Bucket::insert(int key, int value){
-    for(int i=0;i<this->avail.size();i++){
-        if(this->avail[i]){
-            this->size++;
-            this->KeyValue[i] = {key,value};
-            this->avail[i] = false;
-            return;
-        }
-    }
-    /* Propagate Insert */
-    if(!this->overflow){             
-        this->overflow = new Bucket(this->avail.size());
-    }
-    this->overflow->insert(key,value);    
+    this->KeyValue[key].insert(value); 
+}
+void Bucket::insert(int key, set<int> values){
+    this->KeyValue[key]=values;
 }
 
 int Bucket::remove(int key, int value){
-    int d = 0;
-    for(int i=0;i<this->avail.size();i++){
-        if(this->avail[i]) continue;
-        if(this->KeyValue[i].first == key && (value<0 || this->KeyValue[i].second == value)){
-            this->size--;
-            d++;
-            this->avail[i] = true;
-        }
+    int ret = 0;
+    if(value<0){
+        ret = KeyValue.size();
+        this->KeyValue.erase(key);
     }
-    if(!this->overflow) return d;
-    /* Propagate remove */                  
-    int ret = this->overflow->remove(key,value);       
-    if(this->overflow->size ==0){
-        Bucket* temp = this->overflow;
-        this->overflow = this->overflow->overflow;
-        delete temp;
-    }
-    return ret+d;
-}
-unordered_set <int> Bucket::get(int key){
-    unordered_set<int> ret;
-    for(int i=0;i<this->avail.size();i++)
-        if(!this->avail[i] && this->KeyValue[i].first == key)
-            ret.insert(this->KeyValue[i].second);
-    if(this->overflow){ 
-        auto of = this->overflow->get(key);
-        ret.insert(of.begin(), of.end());
+    else{
+        ret = 1;
+        this->KeyValue[key].erase(value);
     }
     return ret;
 }
 
 void Bucket::print(){
-    for(int i=0;i<this->avail.size();i++){
-        if(this->avail[i] == false){
-            cout<<this->KeyValue[i].first<<":"<<this->KeyValue[i].second<<" ";
+    for(auto i:this->KeyValue){
+        cout<<i.first<<":";
+        for(auto j:i.second){
+            cout<<j<<",";
         }
+        cout<<"|";
     }
-    cout<<"|";
-    if(this->overflow) this->overflow->print();
 }
 
 
-Linearhash::Linearhash(int bucket_size, int initial_buckets){ // min one initial bucket
-    Bucket_size = bucket_size;
+Linearhash::Linearhash(int bsize,int initial_buckets){ 
+    this->Bucket_size = bsize;
     this->initial_buckets = initial_buckets;
     for(int i=0;i<initial_buckets;i++)
-        bucket.push_back(new Bucket(Bucket_size));
+        bucket.push_back(new Bucket());
 }
 /* Can change it further but as database is integer only key is integer */
 int Linearhash::hash(int key){
@@ -86,33 +51,18 @@ int Linearhash::hash(int key){
     return m;
 }
 
-unordered_set<int> Linearhash::get(int x){
-    return this->bucket[hash(x)]->get(x);
+set<int> Linearhash::get(int key){
+    if(this->bucket[hash(key)]->KeyValue.find(key) != this->bucket[hash(key)]->KeyValue.end())
+        return this->bucket[hash(key)]->KeyValue[key];
 }
-
-void Linearhash::migrate(Bucket*from, Bucket* to, int &j, int &n_){
-    if(!from) return;
-    migrate(from->overflow,to,j,n_);
-    for(int i=0;i<from->avail.size();i++){
-        if(from->avail[i]) continue;
-
-        int k = hash(from->KeyValue[i].first);
-        int m = k % (int)pow(2,j);
-
-        if(m == n_){
-            to->insert(from->KeyValue[i].first, from->KeyValue[i].second);
-            from->size--;
-            from->avail[i] = true;  
-        }
-        if(from->overflow && from->overflow->size ==0){
-                Bucket* temp = from->overflow;
-                from->overflow = from->overflow->overflow;
-                delete temp;
-        }
-    }
-}
-
+/** @brief function to insert a key(a value in indexcolumn) and record ptr in
+ * Linear hash, Occupancy is checked and buckets are inserted dynamically.
+ * 
+ * @param key
+ * @param value
+ */
 void Linearhash::insert(int key, int value){
+    this->keys.insert(key);
     this->bucket[hash(key)]->insert(key,value);
     r++;
     /* check occupancy and increase buckets */
@@ -121,15 +71,32 @@ void Linearhash::insert(int key, int value){
         int n_ = bucket.size();
         int i = ceil(log2(n_));
         int ndash = n_ % (int)pow(2,i-1);
-        bucket.push_back(new Bucket(Bucket_size));
+        bucket.push_back(new Bucket());
 
-        /* Re-hash ndash bucket keys to n, if they belong to new bucket n */
+        /* Re-hash ndash bucket keys to n_, if they belong to new bucket n_ */
         int j = ceil(log2(n_+1)); 
+        vector<int> temp_del;
+        for(auto i:bucket[ndash]->KeyValue){
+            int k = hash(i.first);
+            int m = k % (int)pow(2,j);
 
-        migrate(bucket[ndash],bucket[n_],j,n_);
+            if(m == n_){
+                bucket[n_]->insert(i.first, i.second);
+                temp_del.push_back(i.first);
+            }
+        }
+        for(int i=0;i<temp_del.size();i++) bucket[ndash]->remove(temp_del[i],-1);
     }
 }
 
+/** @brief function to remove a key(a value in indexcolumn) and record ptr in
+ * Linear hash, Occupancy is checked and buckets are removed dynamically.
+ * Overload function to support single record deletion.
+ * Give value == -1 if all values with key = Key should be deleted.
+ * 
+ * @param key
+ * @param value
+ */
 void Linearhash::remove(int key, int value){
     int d = this->bucket[hash(key)]->remove(key,value);
     r-=d;
@@ -143,15 +110,9 @@ void Linearhash::remove(int key, int value){
         int j = ceil(log2(n_));
         int ndash = n_ % (int)pow(2,j-1);
 
-        Bucket* head = bucket[n_];
-        while(head){ 
-            for(int i=0;i<head->avail.size();i++){
-                if(head->avail[i]) continue;
-                bucket[ndash]->insert(head->KeyValue[i].first,head->KeyValue[i].second);
-            }
-            head =head->overflow;
-        }
-        head = bucket[n_];
+        for(auto i:bucket[n_]->KeyValue)
+            bucket[ndash]->insert(i.first,i.second);
+        Bucket *head = bucket[n_];
         bucket.pop_back();
         delete head;
     }
@@ -160,10 +121,25 @@ void Linearhash::remove(int key, int value){
 void Linearhash::remove(int key){
     this->remove(key,-1);
 }
+
+/** @brief Function to retrieve the distinct values of the keys inserted in the hash.
+ * 
+ * @param order - ASC | DESC
+ */
+vector<int> Linearhash::retrieveKeys(string order){
+    vector<int> ret;
+    if(order == "ASC")
+       for(auto i=keys.begin();i!=keys.end();i++)
+            ret.push_back(*i);
+    else
+        for(auto i=keys.rbegin();i!=keys.rend();i++)
+            ret.push_back(*i);
+    return ret;
+}
 void Linearhash::print(){
     int free=0;
     for(int i=0;i<bucket.size();i++){
-        if(!bucket[i]->is_empty()){
+        if(bucket[i]->KeyValue.size()!=0){
             bucket[i]->print();
             cout<<endl;
         }
@@ -172,26 +148,3 @@ void Linearhash::print(){
     cout<<"total buckets:"<<this->bucket.size()<<" free:"<<free<<endl;
 }
 
-// int main(){
-//     int key,value,x;
-//     void *h = NULL;
-//     h = static_cast<void*>(new Linearhash(2,2));
-    
-//     for(int i=0;i<10;i++){
-//         for(int j=0;j<100;j++){
-//             static_cast<Linearhash*>(h)->insert(j,i+j);
-//         }
-//     }
-//     static_cast<Linearhash*>(h)->print();
-//     cout<<"............."<<endl;
-
-//     for(int i=0;i<10;i++){
-//         for(int j=0;j<100;j++){
-//             static_cast<Linearhash*>(h)->remove(j,i+j);
-//         }
-//         static_cast<Linearhash*>(h)->print();
-//         cout<<"......."<<endl;
-//     }
-    
-//     return 0;
-// }

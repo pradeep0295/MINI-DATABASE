@@ -1,43 +1,42 @@
 #include<math.h>
 /**
  * @brief 
- * 2.0. Linear hashing with bucket(vector) containing KeyValue pairs.
- * initial no. of buckets are 2.
- * is_present is not implemented.
+ * Linear Hashing Data structure to implement indexing on a column in a table.
+ * Dense clustering is performed.
+ * Sorting is done by storing distinct values of keys inserted.
+ * Initializer needs initial buckets and a bucket size.
  */
 
 class Bucket{
 public:
-    vector<pair<int,int>> KeyValue;
-    Bucket *overflow = NULL;
-    int size = 0;
-    vector<bool> avail;
+    unordered_map<int,set<int>> KeyValue;
 
-    Bucket(int size);
-    bool is_empty();
+    Bucket();
+    
     void insert(int key, int value);
+    void insert(int key, set<int> values);
     int remove(int key, int value);
-    unordered_set <int> get(int key);
     void print();
 };
 
 class Linearhash{
-    int Bucket_size = 0; 
     int r=0;
     float threshold = 0.75;
     float min_th    = 0.25;
     int initial_buckets = 2;
+    int Bucket_size = 2;
 
-    vector<Bucket*> bucket;  
+    vector<Bucket*> bucket;
+    set<int> keys;
 
     public:
-    Linearhash(int bucket_size, int initial_buckets);
+    Linearhash(int bsize,int initial_buckets);
     
     int hash(int key);
-    unordered_set<int> get(int x);
-    void migrate(Bucket*from, Bucket* to, int &j, int &n_);
+    set<int> get(int x);
     void insert(int key, int value);
     void remove(int key, int value);
     void remove(int key);
     void print();
+    vector<int> retrieveKeys(string order);
 };
