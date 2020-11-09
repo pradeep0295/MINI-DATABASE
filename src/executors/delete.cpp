@@ -3,32 +3,32 @@
  * @brief 
  * SYNTAX: DELETE FROM <table_name> VALUES <value1>[,<value2>]*
  */
-bool syntacticParseINSERT()
+bool syntacticParseDELETE()
 {
-    logger.log("syntacticParseINSERT");
-    if (tokenizedQuery.size() < 5 || *(tokenizedQuery.begin() + 1) != "INTO" || *(tokenizedQuery.begin() + 3) != "VALUES")
+    logger.log("syntacticParseDELETE");
+    if (tokenizedQuery.size() < 5 || *(tokenizedQuery.begin() + 1) != "FROM" || *(tokenizedQuery.begin() + 3) != "VALUES")
     {
         cout << "SYNTAX ERROR" << endl;
         return false;
     }
-    parsedQuery.queryType = INSERT;
-    parsedQuery.insertRelationName = tokenizedQuery[2];
+    parsedQuery.queryType = DELETE;
+    parsedQuery.deleteRelationName = tokenizedQuery[2];
     for (int i = 4; i < tokenizedQuery.size(); i++)
         parsedQuery.insertColumnList.emplace_back(tokenizedQuery[i]);
     return true;
 } 
 
-bool semanticParseINSERT()
+bool semanticParseDELETE()
 {
-    logger.log("semanticParseINSERT");
+    logger.log("semanticParseDELETE");
 
-    if (tableCatalogue.isTable(parsedQuery.insertRelationName))
+    if (tableCatalogue.isTable(parsedQuery.deleteRelationName))
     {
         cout << "SEMANTIC ERROR: Resultant relation doest't exists" << endl;
         return false;
     }
 
-    Table table = *tableCatalogue.getTable(parsedQuery.insertRelationName);
+    Table table = *tableCatalogue.getTable(parsedQuery.deleteRelationName);
 
     for (auto col : parsedQuery.insertColumnList)
     {
@@ -41,6 +41,6 @@ bool semanticParseINSERT()
     return true;
 }
 
-void executeINSERTION(){
+void executeDELETION(){
 	
 }
