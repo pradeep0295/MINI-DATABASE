@@ -1,7 +1,7 @@
 #include "global.h"
 /**
  * @brief 
- * SYNTAX: INSERT INTO <table_name> VALUES <value1>[,<value2>]*
+ * SYNTAX: DELETE FROM <table_name> VALUES <value1>[,<value2>]*
  */
 bool syntacticParseINSERT()
 {
