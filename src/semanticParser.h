@@ -16,3 +16,5 @@ bool semanticParseRENAME();
 bool semanticParseSELECTION();
 bool semanticParseSORT();
 bool semanticParseSOURCE();
+bool semanticParseDELETE();
+bool semanticParseINSERT();

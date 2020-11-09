@@ -18,6 +18,8 @@ enum QueryType
     SELECTION,
     SORT,
     SOURCE,
+    DELETE,
+    INSERT,
     UNDETERMINED
 };
 
@@ -83,6 +85,20 @@ public:
     vector<string> projectionColumnList;
     string projectionRelationName = "";
 
+    // pahse addition @Hitesh
+
+    // delete
+
+    vector<string> deleteColumnList;
+    string deleteRelationName = "";
+
+    //insert
+
+    vector<string> insertColumnList;
+    string insertRelationName = "";
+
+    //
+
     string renameFromColumnName = "";
     string renameToColumnName = "";
     string renameRelationName = "";
@@ -121,6 +137,7 @@ bool syntacticParseRENAME();
 bool syntacticParseSELECTION();
 bool syntacticParseSORT();
 bool syntacticParseSOURCE();
-
+bool syntacticParseDELETE();
+bool syntacticParseINSERT();
 bool isFileExists(string tableName);
 bool isQueryFile(string fileName);

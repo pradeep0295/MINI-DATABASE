@@ -14,7 +14,7 @@ bool syntacticParseDELETE()
     parsedQuery.queryType = DELETE;
     parsedQuery.deleteRelationName = tokenizedQuery[2];
     for (int i = 4; i < tokenizedQuery.size(); i++)
-        parsedQuery.insertColumnList.emplace_back(tokenizedQuery[i]);
+        parsedQuery.deleteColumnList.emplace_back(tokenizedQuery[i]);
     return true;
 } 
 
@@ -30,7 +30,7 @@ bool semanticParseDELETE()
 
     Table table = *tableCatalogue.getTable(parsedQuery.deleteRelationName);
 
-    for (auto col : parsedQuery.insertColumnList)
+    for (auto col : parsedQuery.deleteColumnList)
     {
         if (!table.isColumn(col))
         {

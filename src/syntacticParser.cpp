@@ -27,6 +27,10 @@ bool syntacticParse()
         return syntacticParseEXPORT();
     else if(possibleQueryType == "SOURCE")
         return syntacticParseSOURCE();
+     else if(possibleQueryType == "DELETE")
+        return syntacticParseDELETE();
+     else if(possibleQueryType == "INSERT")
+        return syntacticParseINSERT();
     else
     {
         string resultantRelationName = possibleQueryType;
@@ -95,6 +99,21 @@ void ParsedQuery::clear()
     this->projectionResultRelationName = "";
     this->projectionColumnList.clear();
     this->projectionRelationName = "";
+
+    // pahse addition @Hitesh
+
+    // delete
+
+    this->deleteColumnList.clear();
+    this-> deleteRelationName = "";
+
+    //insert
+
+    this->insertColumnList.clear();
+    this->insertRelationName = "";
+
+    //
+
 
     this->renameFromColumnName = "";
     this->renameToColumnName = "";
