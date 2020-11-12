@@ -106,6 +106,15 @@ void BufferManager::updatePage(string tableName, int pageIndex, vector<vector<in
     logger.log("BufferManager::updatePage");
     Page page = this->getPage(tableName,pageIndex);
     page.updatePage(rows);
+
+    /* This part is to remove the page such that it gets loaded from temp again*/
+    int i=0;
+    for (auto p : this->pages){
+        if (p.pageName == page.pageName)
+            break;
+        i++;
+    }
+    this->pages.erase(this->pages.begin()+i);      
 }
 
 /**
@@ -118,7 +127,7 @@ void BufferManager::deleteFile(string fileName)
     
     if (remove(fileName.c_str()))
         logger.log("BufferManager::deleteFile: Err");
-        else logger.log("BufferManager::deleteFile: Success");
+    else logger.log("BufferManager::deleteFile: Success");
 }
 
 /**

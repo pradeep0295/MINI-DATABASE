@@ -390,9 +390,9 @@ bool Table::insertRecords(vector<vector<int>> rows){
         bufferManager.updatePage(this->tableName,lastPage,r);
         this->rowCount+=r.size();
         this->rowsPerBlockCount[lastPage]+=r.size();
-        start+=free;
+        start+=r.size();
     }
-    /* if there is no space left or more rows to insert take fresh Page. */
+    /* if there is no space left or more rows to insert, take fresh Page. */
     while(start<rows.size()){
         r.clear();
         for(int i=start;i<start+this->maxRowsPerBlock;i++){

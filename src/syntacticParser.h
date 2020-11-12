@@ -89,12 +89,10 @@ public:
 
     // delete
 
-    vector<string> deleteColumnList;
+    vector<int> record;
     string deleteRelationName = "";
 
     //insert
-
-    vector<string> insertColumnList;
     string insertRelationName = "";
 
     //

@@ -14,7 +14,7 @@ bool syntacticParseINSERT()
     parsedQuery.queryType = INSERT;
     parsedQuery.insertRelationName = tokenizedQuery[2];
     for (int i = 4; i < tokenizedQuery.size(); i++)
-        parsedQuery.insertColumnList.emplace_back(tokenizedQuery[i]);
+        parsedQuery.record.emplace_back(stoi(tokenizedQuery[i]));
     return true;
 } 
 
@@ -22,25 +22,22 @@ bool semanticParseINSERT()
 {
     logger.log("semanticParseINSERT");
 
-    if (tableCatalogue.isTable(parsedQuery.insertRelationName))
+    if (!tableCatalogue.isTable(parsedQuery.insertRelationName))
     {
-        cout << "SEMANTIC ERROR: Resultant relation doest't exists" << endl;
+        cout << "SEMANTIC ERROR: Relation doesn't exists" << endl;
         return false;
     }
 
     Table table = *tableCatalogue.getTable(parsedQuery.insertRelationName);
 
-    for (auto col : parsedQuery.insertColumnList)
-    {
-        if (!table.isColumn(col))
-        {
-            cout << "SEMANTIC ERROR: Column doesn't exist in relation";
-            return false;
-        }
+    if(table.columnCount != parsedQuery.record.size()){
+        cout<< "SEMANTIC ERROR: Relation column count not equal to no. of values.";
+        return false;
     }
     return true;
 }
 
-void executeINSERTION(){
-	
+void executeINSERT(){
+	Table *table = tableCatalogue.getTable(parsedQuery.insertRelationName);
+    table->insertRecords({parsedQuery.record});
 }

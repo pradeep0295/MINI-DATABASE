@@ -114,16 +114,20 @@ void Page::writePage()
 }
 
 /**
- * @brief Adds/updates particular row in the Page.
+ * @brief Appends records in a given Page.
  * 
- * @param row
- * @param rownum
+ * @param r
  */
-void Page::updatePage(vector<vector<int>> rows){
-    for(int i=0;i<rows.size();i++){
-        this->rows.push_back(rows[i]);
+void Page::updatePage(vector<vector<int>>r){
+    for(int i=0;i<r.size();i++){
+        if(this->rows.size()==this->rowCount)
+            this->rows.push_back(r[i]);
+        else
+            for(int j=0;j<r[i].size();j++)
+                this->rows[this->rowCount][j]=r[i][j]; 
         this->rowCount++;
     }
+    this->writePage();
 }
 // void Page::writePage()
 // {

@@ -103,13 +103,10 @@ void ParsedQuery::clear()
     // pahse addition @Hitesh
 
     // delete
-
-    this->deleteColumnList.clear();
-    this-> deleteRelationName = "";
+    this->record.clear();
+    this->deleteRelationName = "";
 
     //insert
-
-    this->insertColumnList.clear();
     this->insertRelationName = "";
 
     //
