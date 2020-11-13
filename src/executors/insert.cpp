@@ -38,6 +38,7 @@ bool semanticParseINSERT()
 }
 
 void executeINSERT(){
+    logger.log("executeINSERT");
 	Table *table = tableCatalogue.getTable(parsedQuery.insertRelationName);
     table->insertRecords({parsedQuery.record});
 }

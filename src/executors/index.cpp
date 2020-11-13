@@ -67,7 +67,10 @@ void executeINDEX()
     table->indexedColumn = parsedQuery.indexColumnName;
     /* Create an instance of linear hash for this table 
     and initialize with given no. of buckets */
-    table->index = static_cast<void *>(new Linearhash(2,parsedQuery.indexInitialise));
+    if(table->indexingStrategy==HASH)
+        table->index = static_cast<void *>(new Linearhash(2,parsedQuery.indexInitialise));
+    // else
+        /* bplus tree */
     table->buildIndex();
     return;
 }

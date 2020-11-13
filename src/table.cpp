@@ -353,6 +353,7 @@ pair<int,int> Table::rec(int recptr){
  * @param recptr
  */
 void Table::insertIntoIndex(vector<int> &row, int recptr){
+    logger.log("Table::insertIntoIndex");
     int column = getColumnIndex(this->indexedColumn);
     /* static cast void* to hash or b+tree object according to index type */
     if(this->indexingStrategy == HASH){

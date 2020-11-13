@@ -119,6 +119,7 @@ void Page::writePage()
  * @param r
  */
 void Page::updatePage(vector<vector<int>>r,int pos){
+    logger.log("Page::updatePage");
     /* if position is given just replace there, only happens in delete */
     if(pos>=0)
         this->rows[pos]=r[0];

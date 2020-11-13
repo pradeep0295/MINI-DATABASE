@@ -115,18 +115,40 @@ void executeSELECTION()
     int secondColumnIndex;
     if (parsedQuery.selectType == COLUMN)
         secondColumnIndex = table.getColumnIndex(parsedQuery.selectionSecondColumnName);
-    while (!row.empty())
-    {
+    if(table.indexed && 
+    (table.indexedColumn==parsedQuery.selectionSecondColumnName 
+    && parsedQuery.selectType == INT_LITERAL && parsedQuery.selectionBinaryOperator == EQUAL)){
+        int value2 = parsedQuery.selectionIntLiteral;
+        if(table.indexingStrategy == HASH){
+            Linearhash *index = static_cast<Linearhash*>(table.index);
+            auto sel_records = index->get(value2);
+            for(auto record:sel_records){
+                row.clear();
+                pair<int,int> p = table.rec(record);
+                Page page = bufferManager.getPage(table.tableName,p.first);
+                row = page.getRow(p.second);
+                resultantTable->writeRow<int>(row);
+            }
+        }
+        // else
+        // {
+        //     /* code for b+tree*/
+        // }
+    }
+    else{
+        while (!row.empty())
+        {
 
-        int value1 = row[firstColumnIndex];
-        int value2;
-        if (parsedQuery.selectType == INT_LITERAL)
-            value2 = parsedQuery.selectionIntLiteral;
-        else
-            value2 = row[secondColumnIndex];
-        if (evaluateBinOp(value1, value2, parsedQuery.selectionBinaryOperator))
-            resultantTable->writeRow<int>(row);
-        row = cursor.getNext();
+            int value1 = row[firstColumnIndex];
+            int value2;
+            if (parsedQuery.selectType == INT_LITERAL)
+                value2 = parsedQuery.selectionIntLiteral;
+            else
+                value2 = row[secondColumnIndex];
+            if (evaluateBinOp(value1, value2, parsedQuery.selectionBinaryOperator))
+                resultantTable->writeRow<int>(row);
+            row = cursor.getNext();
+        }
     }
     if(resultantTable->blockify())
         tableCatalogue.insertTable(resultantTable);
