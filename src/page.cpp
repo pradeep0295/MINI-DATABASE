@@ -129,6 +129,16 @@ void Page::updatePage(vector<vector<int>>r){
     }
     this->writePage();
 }
+
+/**
+ * @brief removes last row from the page
+ * 
+ */
+void Page::shrinkPage(){
+    logger.log("Page::shrinkPage");
+    rows.pop_back();
+    this->rowCount--;
+}
 // void Page::writePage()
 // {
 //     logger.log("Page::writePage");

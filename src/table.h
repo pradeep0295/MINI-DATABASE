@@ -53,7 +53,11 @@ public:
     void unload();
     pair<int,int> rec(int recptr);
     void buildIndex();
+    void insertIntoIndex(vector<int>&row,int recptr);
     bool insertRecords(vector<vector<int>>rows);
+    bool deleteRecord(int recordptr);
+    void updateKeyfromIndex(vector<int> record, int oldrec, int recordptr);
+    void removeKeyfromIndex(vector<int> record, int recordptr);
 
     /**
  * @brief Static function that takes a vector of valued and prints them out in a

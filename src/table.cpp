@@ -342,32 +342,71 @@ int Table::getColumnIndex(string columnName)
  * @param recptr - record position in table.
  */
 pair<int,int> Table::rec(int recptr){
+    logger.log("Table::rec");
     return {recptr/this->maxRowsPerBlock , recptr%this->maxRowsPerBlock};
 }
 
+/**
+ * @brief Function to insert key:value into index.
+ * 
+ * @param row in table.
+ * @param recptr
+ */
+void Table::insertIntoIndex(vector<int> &row, int recptr){
+    int column = getColumnIndex(this->indexedColumn);
+    /* static cast void* to hash or b+tree object according to index type */
+    if(this->indexingStrategy == HASH){
+        Linearhash *Index = static_cast<Linearhash*>(this->index);
+        Index->insert(row[column],recptr);
+    }
+    // else if(this->indexingStrategy == BTREE)
+    //     buildBplustree();
+}
 /**
  * @brief Function to create an index on specified column.
  * 
  * @param None
  */
 void Table::buildIndex(){
-    int column = getColumnIndex(this->indexedColumn);
+    logger.log("Table::buildIndex");
     
     Cursor cursor(this->tableName, 0);
     vector<int> row;
 
     for(int i=0;i<this->rowCount;i++){
         row = cursor.getNext();
-        /* static cast void* to hash or b+tree object according to index type */
-        if(this->indexingStrategy == HASH){
-            Linearhash *Index = static_cast<Linearhash*>(this->index);
-            Index->insert(row[column],i);
-        }
-        // else if(this->indexingStrategy == BTREE)
-        //     buildBplustree();
+        this->insertIntoIndex(row,i);
     }
     // hash->print();
     this->indexed = true;
+}
+
+/** @brief Function to update key and record pointer value in 
+ *          in index.
+ * @param record - record vector
+ * @param recordptr
+ */
+void Table::updateKeyfromIndex(vector<int> record, int oldrec, int recordptr){
+    logger.log("Table::updateKeyfromIndex");
+    if(this->indexingStrategy == HASH){
+        Linearhash *Index = static_cast<Linearhash*>(this->index);
+        int col = this->getColumnIndex(this->indexedColumn);
+        Index->update(record[col],oldrec,recordptr);
+    }
+}
+
+/** @brief Function to update key and record pointer value in 
+ *          in index.
+ * @param record - record vector
+ * @param recordptr
+ */
+void Table::removeKeyfromIndex(vector<int> record, int recordptr){
+    logger.log("Table::removeKeyfromIndex");
+    if(this->indexingStrategy == HASH){
+        Linearhash *Index = static_cast<Linearhash*>(this->index);
+        int col = this->getColumnIndex(this->indexedColumn);
+        Index->remove(record[col],recordptr);
+    }
 }
 
 /**
@@ -377,6 +416,7 @@ void Table::buildIndex(){
  * @return yes if inserted else no.
  */
 bool Table::insertRecords(vector<vector<int>> rows){
+    logger.log("Table::insertRecords");
     if(rows[0].size() != this->columnCount)
         return false;
     /* insert into already free last block of table.*/
@@ -386,7 +426,10 @@ bool Table::insertRecords(vector<vector<int>> rows){
     vector<vector<int>> r;
     /* do check for Lastpage existence */
     if( free != 0 && free !=this->maxRowsPerBlock && lastPage>-1){
-        for(int j=0;j<free&&j<rows.size();j++) r.push_back(rows[j]);
+        for(int j=0;j<free&&j<rows.size();j++){ 
+            r.push_back(rows[j]);
+            if(this->indexed)this->insertIntoIndex(rows[j],this->rowCount+j);
+        }
         bufferManager.updatePage(this->tableName,lastPage,r);
         this->rowCount+=r.size();
         this->rowsPerBlockCount[lastPage]+=r.size();
@@ -398,6 +441,7 @@ bool Table::insertRecords(vector<vector<int>> rows){
         for(int i=start;i<start+this->maxRowsPerBlock;i++){
             if(i==rows.size())break;
             r.push_back(rows[i]);
+            if(this->indexed)this->insertIntoIndex(rows[i],this->rowCount+i);
         }
         bufferManager.writePage(this->tableName, this->blockCount, r, r.size());
         this->blockCount++;
@@ -405,5 +449,45 @@ bool Table::insertRecords(vector<vector<int>> rows){
         this->rowCount+=r.size();
         start+=r.size();
     }
+    return true;
+}
+
+/** @brief Function to delete the specified row from the table.
+ * 
+ * @param recordptr position of the record in the table( 0 is first position).
+ */
+bool Table::deleteRecord(int recordptr){
+    logger.log("Table::deleteRecord");
+    vector<int> fillrecord, delrecord;
+    int lastrecord = this->rowCount-1;
+    auto lastPage = this->rec(this->rowCount-1);
+    auto delRecPage =this->rec(recordptr);
+    
+    /*  if the record to be deleted is last in table, delete the
+        last record otherwise swap it with the record to be deleted. */
+    if(this->rowCount-1 != recordptr){
+        Cursor cursor(this->tableName,lastPage.first);
+        fillrecord = cursor.page.getRow(lastPage.second);
+    }
+    Cursor cursor(this->tableName,delRecPage.first);
+    delrecord = cursor.page.getRow(delRecPage.second);
+
+    /* Last row is deleted for every delete operation */
+    bufferManager.shrinkPage(this->tableName,lastPage.first);
+    this->rowCount--;
+    
+    /* if Lastpage is empty then free it up */
+    if(this->rowCount % this-> maxRowsPerBlock ==0){
+        bufferManager.deleteFile(this->tableName,lastPage.first);
+        this->blockCount--;
+    }
+
+    if(fillrecord.size()){
+        bufferManager.updatePage(this->tableName,delRecPage.first,{fillrecord});
+        if(this->indexed)
+            updateKeyfromIndex(fillrecord,lastrecord,recordptr);
+    }
+    if(delrecord.size() && this->indexed)
+            removeKeyfromIndex(delrecord,recordptr);
     return true;
 }

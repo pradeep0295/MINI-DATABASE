@@ -27,4 +27,5 @@ class Page{
     vector<int> getRow(int rowIndex);
     void writePage();
     void updatePage(vector<vector<int>> rows);
+    void shrinkPage();
 };

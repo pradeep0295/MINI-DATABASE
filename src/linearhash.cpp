@@ -136,6 +136,14 @@ vector<int> Linearhash::retrieveKeys(string order){
             ret.push_back(*i);
     return ret;
 }
+
+/**
+ * @brief Function to update value for a key to value2.
+ */
+void Linearhash::update(int key, int value, int value2){
+    this->bucket[hash(key)]->KeyValue[key].erase(value);
+    this->bucket[hash(key)]->KeyValue[key].insert(value2);
+}
 void Linearhash::print(){
     int free=0;
     for(int i=0;i<bucket.size();i++){

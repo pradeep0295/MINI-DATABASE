@@ -143,3 +143,15 @@ void BufferManager::deleteFile(string tableName, int pageIndex)
     string fileName = "../data/temp/"+tableName + "_Page" + to_string(pageIndex);
     this->deleteFile(fileName);
 }
+
+/**
+ * @brief Function that removes the last row from the Page.
+ * 
+ * @param tableName 
+ * @param pageIndex
+ */
+void BufferManager::shrinkPage(string tableName,int pageIndex){
+    logger.log("BufferManager::deleteRow");
+    Page page = this->getPage(tableName,pageIndex);
+    page.shrinkPage();
+}

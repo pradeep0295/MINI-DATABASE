@@ -24,7 +24,7 @@ class Linearhash{
     float threshold = 0.75;
     float min_th    = 0.25;
     int initial_buckets = 2;
-    int Bucket_size = 2;
+    int Bucket_size = 4;
 
     vector<Bucket*> bucket;
     set<int> keys;
@@ -35,6 +35,7 @@ class Linearhash{
     int hash(int key);
     set<int> get(int x);
     void insert(int key, int value);
+    void update(int key, int value, int value2);
     void remove(int key, int value);
     void remove(int key);
     void print();

@@ -1,4 +1,11 @@
 #include "global.h"
+bool not_digit(string s){
+    for(int i=0;i<s.size();i++){
+        if(s[i]-'0'>9 && s[i]-'0'<0)
+            return true;
+    }
+    return false;
+}
 /**
  * @brief 
  * SYNTAX: INDEX ON column_name FROM relation_name USING indexing_strategy 
@@ -12,7 +19,8 @@ bool syntacticParseINDEX()
     logger.log("syntacticParseINDEX");
     if (tokenizedQuery.size() != 9 || tokenizedQuery[1] != "ON" 
         || tokenizedQuery[3] != "FROM" || tokenizedQuery[5] != "USING"
-        || (tokenizedQuery[7] != "FANOUT" && tokenizedQuery[7] != "BUCKETS"))
+        || (tokenizedQuery[7] != "FANOUT" && tokenizedQuery[7] != "BUCKETS")
+        || not_digit(tokenizedQuery[8]))
     {
         cout << "SYNTAX ERROR" << endl;
         return false;

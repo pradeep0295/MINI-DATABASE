@@ -36,4 +36,5 @@ class BufferManager{
     void deleteFile(string fileName);
     void writePage(string tableName, int pageIndex, vector<vector<int>> rows, int rowCount);
     void updatePage(string tableName, int pageIndex, vector<vector<int>> rows);
+    void shrinkPage(string tableName, int pageIndex);
 };
