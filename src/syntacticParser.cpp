@@ -105,6 +105,7 @@ void ParsedQuery::clear()
     // delete
     this->record.clear();
     this->deleteRelationName = "";
+    this->rowToDelete = 0;
 
     //insert
     this->insertRelationName = "";

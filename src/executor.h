@@ -17,7 +17,7 @@ void executeSELECTION();
 void executeSORT();
 void executeSOURCE();
 void executeINSERT();
-// void executeDELETE();
+void executeDELETE();
 
 bool evaluateBinOp(int value1, int value2, BinaryOperator binaryOperator);
 void printRowCount(int rowCount);

@@ -94,6 +94,8 @@ public:
 
     //insert
     string insertRelationName = "";
+    /* longlong int as the table calss has rowCount as long long */
+    long long int rowToDelete = 0;  
 
     //
 

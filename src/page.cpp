@@ -118,14 +118,19 @@ void Page::writePage()
  * 
  * @param r
  */
-void Page::updatePage(vector<vector<int>>r){
-    for(int i=0;i<r.size();i++){
-        if(this->rows.size()==this->rowCount)
-            this->rows.push_back(r[i]);
-        else
-            for(int j=0;j<r[i].size();j++)
-                this->rows[this->rowCount][j]=r[i][j]; 
-        this->rowCount++;
+void Page::updatePage(vector<vector<int>>r,int pos){
+    /* if position is given just replace there, only happens in delete */
+    if(pos>=0)
+        this->rows[pos]=r[0];
+    else{
+        for(int i=0;i<r.size();i++){
+            if(this->rows.size()==this->rowCount)
+                this->rows.push_back(r[i]);
+            else
+                for(int j=0;j<r[i].size();j++)
+                    this->rows[this->rowCount][j]=r[i][j]; 
+            this->rowCount++;
+        }
     }
     this->writePage();
 }
@@ -136,8 +141,8 @@ void Page::updatePage(vector<vector<int>>r){
  */
 void Page::shrinkPage(){
     logger.log("Page::shrinkPage");
-    rows.pop_back();
     this->rowCount--;
+    this->writePage();
 }
 // void Page::writePage()
 // {

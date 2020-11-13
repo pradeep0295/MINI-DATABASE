@@ -337,7 +337,7 @@ int Table::getColumnIndex(string columnName)
 }
 
 /**
- * @brief Function that converts rec ptr back to record position.
+ * @brief Function that converts rec ptr back to page id and row no.
  * 
  * @param recptr - record position in table.
  */
@@ -373,7 +373,7 @@ void Table::buildIndex(){
     Cursor cursor(this->tableName, 0);
     vector<int> row;
 
-    for(int i=0;i<this->rowCount;i++){
+    for(long long int i=0;i<this->rowCount;i++){
         row = cursor.getNext();
         this->insertIntoIndex(row,i);
     }
@@ -430,7 +430,7 @@ bool Table::insertRecords(vector<vector<int>> rows){
             r.push_back(rows[j]);
             if(this->indexed)this->insertIntoIndex(rows[j],this->rowCount+j);
         }
-        bufferManager.updatePage(this->tableName,lastPage,r);
+        bufferManager.updatePage(this->tableName,lastPage,r,-1);
         this->rowCount+=r.size();
         this->rowsPerBlockCount[lastPage]+=r.size();
         start+=r.size();
@@ -458,6 +458,7 @@ bool Table::insertRecords(vector<vector<int>> rows){
  */
 bool Table::deleteRecord(int recordptr){
     logger.log("Table::deleteRecord");
+    cout<<recordptr<<endl;
     vector<int> fillrecord, delrecord;
     int lastrecord = this->rowCount-1;
     auto lastPage = this->rec(this->rowCount-1);
@@ -466,24 +467,29 @@ bool Table::deleteRecord(int recordptr){
     /*  if the record to be deleted is last in table, delete the
         last record otherwise swap it with the record to be deleted. */
     if(this->rowCount-1 != recordptr){
+        fillrecord.clear();
         Cursor cursor(this->tableName,lastPage.first);
         fillrecord = cursor.page.getRow(lastPage.second);
     }
     Cursor cursor(this->tableName,delRecPage.first);
+    delrecord.clear();
     delrecord = cursor.page.getRow(delRecPage.second);
 
     /* Last row is deleted for every delete operation */
     bufferManager.shrinkPage(this->tableName,lastPage.first);
     this->rowCount--;
+    this->rowsPerBlockCount[lastPage.first]--;
     
     /* if Lastpage is empty then free it up */
     if(this->rowCount % this-> maxRowsPerBlock ==0){
         bufferManager.deleteFile(this->tableName,lastPage.first);
         this->blockCount--;
+        this->rowsPerBlockCount.pop_back();
     }
 
+    /* Replace the recordptr with last record in last page*/
     if(fillrecord.size()){
-        bufferManager.updatePage(this->tableName,delRecPage.first,{fillrecord});
+        bufferManager.updatePage(this->tableName,delRecPage.first,{fillrecord},recordptr);
         if(this->indexed)
             updateKeyfromIndex(fillrecord,lastrecord,recordptr);
     }

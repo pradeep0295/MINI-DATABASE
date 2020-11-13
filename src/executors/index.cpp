@@ -1,11 +1,5 @@
 #include "global.h"
-bool not_digit(string s){
-    for(int i=0;i<s.size();i++){
-        if(s[i]-'0'>9 && s[i]-'0'<0)
-            return true;
-    }
-    return false;
-}
+
 /**
  * @brief 
  * SYNTAX: INDEX ON column_name FROM relation_name USING indexing_strategy 

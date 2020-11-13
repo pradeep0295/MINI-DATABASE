@@ -101,11 +101,11 @@ void BufferManager::writePage(string tableName, int pageIndex, vector<vector<int
  * @param rows 
  * @param startrow
  */
-void BufferManager::updatePage(string tableName, int pageIndex, vector<vector<int>> rows)
+void BufferManager::updatePage(string tableName, int pageIndex, vector<vector<int>> rows,int pos)
 {
     logger.log("BufferManager::updatePage");
     Page page = this->getPage(tableName,pageIndex);
-    page.updatePage(rows);
+    page.updatePage(rows,pos);
 
     /* This part is to remove the page such that it gets loaded from temp again*/
     int i=0;
@@ -154,4 +154,12 @@ void BufferManager::shrinkPage(string tableName,int pageIndex){
     logger.log("BufferManager::deleteRow");
     Page page = this->getPage(tableName,pageIndex);
     page.shrinkPage();
+    /* This part is to remove the page such that it gets loaded from temp again*/
+    int i=0;
+    for (auto p : this->pages){
+        if (p.pageName == page.pageName)
+            break;
+        i++;
+    }
+    this->pages.erase(this->pages.begin()+i); 
 }

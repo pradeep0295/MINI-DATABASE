@@ -4,7 +4,7 @@
 #include<fstream>
 
 using namespace std;
-
+bool not_digit(string s);
 class Logger{
 
     string logFile = "log";
