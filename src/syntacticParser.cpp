@@ -27,10 +27,12 @@ bool syntacticParse()
         return syntacticParseEXPORT();
     else if(possibleQueryType == "SOURCE")
         return syntacticParseSOURCE();
-     else if(possibleQueryType == "DELETE")
+    else if(possibleQueryType == "DELETE")
         return syntacticParseDELETE();
-     else if(possibleQueryType == "INSERT")
+    else if(possibleQueryType == "INSERT")
         return syntacticParseINSERT();
+    else if(possibleQueryType == "BULKINSERT")
+        return syntacticParseBULKINSERT();
     else
     {
         string resultantRelationName = possibleQueryType;

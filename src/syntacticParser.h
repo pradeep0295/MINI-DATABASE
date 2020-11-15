@@ -20,6 +20,7 @@ enum QueryType
     SOURCE,
     DELETE,
     INSERT,
+    BULKINSERT,
     UNDETERMINED
 };
 
@@ -139,5 +140,6 @@ bool syntacticParseSORT();
 bool syntacticParseSOURCE();
 bool syntacticParseDELETE();
 bool syntacticParseINSERT();
+bool syntacticParseBULKINSERT();
 bool isFileExists(string tableName);
 bool isQueryFile(string fileName);

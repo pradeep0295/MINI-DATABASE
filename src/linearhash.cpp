@@ -19,6 +19,8 @@ int Bucket::remove(int key, int value){
     else{
         ret = 1;
         this->KeyValue[key].erase(value);
+        if(this->KeyValue[key].size()==0)
+            this->KeyValue.erase(key);
     }
     return ret;
 }

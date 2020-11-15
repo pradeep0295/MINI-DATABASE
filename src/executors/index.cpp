@@ -52,7 +52,7 @@ bool semanticParseINDEX()
         return false;
     }
     Table* table = tableCatalogue.getTable(parsedQuery.indexRelationName);
-    if(table->indexed){
+    if(table->indexed && parsedQuery.indexingStrategy!=NOTHING){
         cout << "SEMANTIC ERROR: Table already indexed" << endl;
         return false;
     }
@@ -63,14 +63,24 @@ void executeINDEX()
 {
     logger.log("executeINDEX");
     Table* table = tableCatalogue.getTable(parsedQuery.indexRelationName);
-    table->indexingStrategy = parsedQuery.indexingStrategy;
-    table->indexedColumn = parsedQuery.indexColumnName;
+    
     /* Create an instance of linear hash for this table 
     and initialize with given no. of buckets */
-    if(table->indexingStrategy==HASH)
+    if(parsedQuery.indexingStrategy==HASH)
         table->index = static_cast<void *>(new Linearhash(2,parsedQuery.indexInitialise));
-    // else
+    // else if(table->indexingStrategy == BTREE)
         /* bplus tree */
+    else{
+        if(table->indexingStrategy == HASH)
+            delete static_cast<Linearhash*>(table->index);
+        table->index = NULL;
+        table->indexingStrategy=NOTHING;
+        table->indexed=false;
+        table->indexedColumn="";
+        return;
+    }
+    table->indexingStrategy = parsedQuery.indexingStrategy;
+    table->indexedColumn = parsedQuery.indexColumnName;
     table->buildIndex();
     return;
 }

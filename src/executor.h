@@ -17,6 +17,7 @@ void executeSELECTION();
 void executeSORT();
 void executeSOURCE();
 void executeINSERT();
+void executeBULKINSERT();
 void executeDELETE();
 
 bool evaluateBinOp(int value1, int value2, BinaryOperator binaryOperator);
