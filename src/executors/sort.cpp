@@ -198,6 +198,8 @@ void executeSORT(){
 
         resultantTable->blockify();
         tableCatalogue.insertTable(resultantTable);
+        if (!resultantTable->isPermanent())
+            bufferManager.deleteFile(resultantTable->sourceFileName);
     }
 
     

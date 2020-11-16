@@ -77,6 +77,22 @@ Page BufferManager::insertIntoPool(string tableName, int pageIndex)
 }
 
 /**
+ * @brief return position of page in buffer.
+ * 
+ * @param tableName
+ * @param pageIndex
+ */
+int BufferManager::position(string tableName, int pageIndex){
+    string pageName = "../data/temp/"+tableName + "_Page" + to_string(pageIndex);
+    int i=0;
+    for(auto p:this->pages){
+        if(p.pageName == pageName)
+            return i;
+        i++;
+    }
+    return -1;
+}
+/**
  * @brief The buffer manager is also responsible for writing pages. This is
  * called when new tables are created using assignment statements.
  *
@@ -90,6 +106,10 @@ void BufferManager::writePage(string tableName, int pageIndex, vector<vector<int
     logger.log("BufferManager::writePage");
     Page page(tableName, pageIndex, rows, rowCount);
     page.writePage();
+    int pos = this->position(tableName,pageIndex);
+    if(pos>-1){
+        this->pages.erase(this->pages.begin()+pos);
+    }
 }
 
 /**

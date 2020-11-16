@@ -26,6 +26,7 @@ class BufferManager{
     bool inPool(string pageName);
     Page getFromPool(string pageName);
     Page insertIntoPool(string tableName, int pageIndex);
+    int position(string tableName, int pageIndex);
 
     public:
     

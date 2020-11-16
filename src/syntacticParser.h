@@ -9,6 +9,7 @@ enum QueryType
     CROSS,
     DISTINCT,
     EXPORT,
+    GROUPBY,
     INDEX,
     JOIN,
     LIST,
@@ -70,6 +71,13 @@ public:
 
     string exportRelationName = "";
 
+    string groupbyResultRelationName = "";
+    string groupbyColumnName = "";
+    string groupAggColumnName = "";
+    string groupbyRelationName =""; 
+    string groupbyaggregateType = "";
+
+
     IndexingStrategy indexingStrategy = NOTHING;
     string indexColumnName = "";
     string indexRelationName = "";
@@ -99,7 +107,7 @@ public:
 
     //insert
     string insertRelationName = "";
-    /* longlong int as the table calss has rowCount as long long */
+    /* longlong int as the table class has rowCount as long long */
     long long int rowToDelete = 0;  
 
     //
@@ -134,6 +142,7 @@ bool syntacticParseCROSS();
 bool syntacticParseDISTINCT();
 bool syntacticParseEXPORT();
 bool syntacticParseINDEX();
+bool syntacticParseGROUPBY();
 bool syntacticParseJOIN();
 bool syntacticParseLIST();
 bool syntacticParseLOAD();

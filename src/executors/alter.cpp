@@ -47,7 +47,6 @@ void executeALTER(){
     Table *table = tableCatalogue.getTable(parsedQuery.alterRelationName);
     auto columns = table->columns;
     int delcol = (!parsedQuery.alterType)?table->getColumnIndex(parsedQuery.alterColumnName):-1;
-    cout<<delcol<<endl;
     if(parsedQuery.alterType) columns.push_back(parsedQuery.alterColumnName);
     else columns.erase(columns.begin()+delcol);
     Cursor cursor = table->getCursor();

@@ -306,8 +306,6 @@ void Table::unload(){
     logger.log("Table::~unload");
     for (int pageCounter = 0; pageCounter < this->blockCount; pageCounter++)
         bufferManager.deleteFile(this->tableName, pageCounter);
-    if (!isPermanent())
-        bufferManager.deleteFile(this->sourceFileName);
 }
 
 /**

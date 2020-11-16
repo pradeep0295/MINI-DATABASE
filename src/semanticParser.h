@@ -8,6 +8,7 @@ bool semanticParseCROSS();
 bool semanticParseDISTINCT();
 bool semanticParseEXPORT();
 bool semanticParseINDEX();
+bool semanticParseGROUPBY();
 bool semanticParseJOIN();
 bool semanticParseLIST();
 bool semanticParseLOAD();

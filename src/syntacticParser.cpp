@@ -56,6 +56,8 @@ bool syntacticParse()
             return syntacticParseDISTINCT();
         else if (possibleQueryType == "SORT")
             return syntacticParseSORT();
+        else if(possibleQueryType == "GROUP")
+            return syntacticParseGROUPBY();
         else
         {
             cout << "SYNTAX ERROR" << endl;
@@ -73,6 +75,10 @@ void ParsedQuery::clear()
 {
     logger.log("ParseQuery::clear");
     this->queryType = UNDETERMINED;
+    
+    this->alterRelationName = "";
+    this->alterColumnName = "";
+    this->alterType = false;
 
     this->clearRelationName = "";
 
@@ -85,9 +91,16 @@ void ParsedQuery::clear()
 
     this->exportRelationName = "";
 
+    this->groupbyResultRelationName = "";
+    this->groupbyColumnName = "";
+    this->groupbyRelationName =""; 
+    this->groupAggColumnName = "";
+    this->groupbyaggregateType = "";
+
     this->indexingStrategy = NOTHING;
     this->indexColumnName = "";
     this->indexRelationName = "";
+    this->indexInitialise =-1;
 
     this->joinBinaryOperator = NO_BINOP_CLAUSE;
     this->joinResultRelationName = "";

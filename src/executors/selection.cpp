@@ -150,8 +150,11 @@ void executeSELECTION()
             row = cursor.getNext();
         }
     }
-    if(resultantTable->blockify())
+    if(resultantTable->blockify()){
         tableCatalogue.insertTable(resultantTable);
+        if (!resultantTable->isPermanent())
+            bufferManager.deleteFile(resultantTable->sourceFileName);
+    }
     else{
         cout<<"Empty Table"<<endl;
         delete resultantTable;
