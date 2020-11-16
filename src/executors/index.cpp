@@ -63,11 +63,12 @@ void executeINDEX()
 {
     logger.log("executeINDEX");
     Table* table = tableCatalogue.getTable(parsedQuery.indexRelationName);
+    int bucketsize = (BLOCK_SIZE * 1024) /4;
     
     /* Create an instance of linear hash for this table 
     and initialize with given no. of buckets */
     if(parsedQuery.indexingStrategy==HASH)
-        table->index = static_cast<void *>(new Linearhash(2,parsedQuery.indexInitialise));
+        table->index = static_cast<void *>(new Linearhash(bucketsize,parsedQuery.indexInitialise));
     // else if(table->indexingStrategy == BTREE)
         /* bplus tree */
     else{
