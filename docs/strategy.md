@@ -1,5 +1,6 @@
 OPTIMISATIONS DONE:
   1) FOR THE BULK INSERTION:
-      We have implemented bulk insertion not exactly just inserting record by record.
-      Each block of records to be inserted are picked and performed the insertion.
-      This reduces the no. of block accesses in the buffermanger.
+      We have implemented bulk insertion by not just inserting record by record.
+      The csv of records are taken and once block size is reached after reading each row,
+      we insert the whole block in the table at the last pages. So that nothing else is changed 
+      in the table. And also, decreading buffer fetches.
