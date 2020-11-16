@@ -11,7 +11,9 @@ bool syntacticParse()
         return false;
     }
 
-    if (possibleQueryType == "CLEAR")
+    if(possibleQueryType == "ALTER")
+        return syntacticParseALTER();
+    else if (possibleQueryType == "CLEAR")
         return syntacticParseCLEAR();
     else if (possibleQueryType == "INDEX")
         return syntacticParseINDEX();

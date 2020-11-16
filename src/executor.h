@@ -2,6 +2,7 @@
 
 void executeCommand();
 
+void executeALTER();
 void executeCLEAR();
 void executeCROSS();
 void executeDISTINCT();

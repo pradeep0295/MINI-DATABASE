@@ -3,6 +3,7 @@
 bool semanticParse(){
     logger.log("semanticParse");
     switch(parsedQuery.queryType){
+        case ALTER: return semanticParseALTER();
         case CLEAR: return semanticParseCLEAR();
         case CROSS: return semanticParseCROSS();
         case DISTINCT: return semanticParseDISTINCT();

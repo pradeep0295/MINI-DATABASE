@@ -280,6 +280,7 @@ void Table::makePermanent()
         this->writeRow(row, fout);
     }
     fout.close();
+    this->sourceFileName = "../data/" + this->tableName + ".csv";
 }
 
 /**
@@ -459,7 +460,6 @@ bool Table::insertRecords(vector<vector<int>> rows){
  */
 bool Table::deleteRecord(int recordptr){
     logger.log("Table::deleteRecord");
-    cout<<recordptr<<endl;
     vector<int> fillrecord, delrecord;
     int lastrecord = this->rowCount-1;
     auto lastPage = this->rec(this->rowCount-1);

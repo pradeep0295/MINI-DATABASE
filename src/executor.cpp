@@ -3,6 +3,7 @@
 void executeCommand(){
 
     switch(parsedQuery.queryType){
+        case ALTER: executeALTER(); break;
         case CLEAR: executeCLEAR(); break;
         case CROSS: executeCROSS(); break;
         case DISTINCT: executeDISTINCT(); break;

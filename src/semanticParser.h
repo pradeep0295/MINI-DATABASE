@@ -2,6 +2,7 @@
 
 bool semanticParse();
 
+bool semanticParseALTER();
 bool semanticParseCLEAR();
 bool semanticParseCROSS();
 bool semanticParseDISTINCT();

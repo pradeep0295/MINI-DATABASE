@@ -4,6 +4,7 @@ using namespace std;
 
 enum QueryType
 {
+    ALTER,
     CLEAR,
     CROSS,
     DISTINCT,
@@ -55,6 +56,9 @@ class ParsedQuery
 public:
     QueryType queryType = UNDETERMINED;
 
+    string alterRelationName = "";
+    string alterColumnName = "";
+    bool alterType = false;
     string clearRelationName = "";
 
     string crossResultRelationName = "";
@@ -124,6 +128,7 @@ public:
 };
 
 bool syntacticParse();
+bool syntacticParseALTER();
 bool syntacticParseCLEAR();
 bool syntacticParseCROSS();
 bool syntacticParseDISTINCT();
